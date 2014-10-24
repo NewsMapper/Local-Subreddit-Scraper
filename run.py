@@ -5,7 +5,8 @@ import redis
 import requests
 import simplejson as json
 from lxml import etree
-from reddit_scrapper import SUBREDDITS, TEMP_SUBREDDITS, SUBREDDITS_GEOCODING_QUEUE, AGENT_HEADER
+from reddit_scrapper import TEMP_SUBREDDITS, SUBREDDITS_GEOCODING_QUEUE
+from config import *
 
 
 
@@ -24,8 +25,6 @@ REGIONS = [
 ]
 
 REDDIT_WIKI = 'http://www.reddit.com/r/LocationReddits/wiki/faq/'
-REDIS_HOST = 'localhost'
-REDIS_PORT = 6379
 SCRAPING_WORKER_COUNT = 20 
 GEOCODING_WORKER_COUNT = 30
 WORKERS = []

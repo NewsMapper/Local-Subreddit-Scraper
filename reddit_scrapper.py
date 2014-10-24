@@ -5,15 +5,12 @@ import redis
 import simplejson as json
 import manager
 from summarizer import summarize_by_url
+from config import *
 
 
 
-
-SUBREDDIT_KEY = 'REDDIT:SUBREDDIT'
-SUBREDDITS = 'REDDIT:SUBREDDITS'
 SUBREDDITS_GEOCODING_QUEUE = 'GEOCODING:SUBREDDITS:QUEUE'
 TEMP_SUBREDDITS = '%s:%s' % (SUBREDDITS, 'TEMP')
-AGENT_HEADER = {'User-Agent': "Tom's kickass scrapper"}
 
 
 
