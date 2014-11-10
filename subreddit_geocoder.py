@@ -2,7 +2,7 @@ import sys
 import requests
 import json
 from urllib import urlencode
-from reddit_scrapper import SUBREDDITS, SUBREDDITS_GEOCODING_QUEUE
+from reddit_scraper import SUBREDDITS, SUBREDDITS_GEOCODING_QUEUE
 
 
 

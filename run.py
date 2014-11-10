@@ -26,7 +26,7 @@ REGIONS = [
 ]
 
 REDDIT_WIKI = 'http://www.reddit.com/r/LocationReddits/wiki/faq/'
-SCRAPING_WORKER_COUNT 40 
+SCRAPING_WORKER_COUNT = 40 
 GEOCODING_WORKER_COUNT = 60
 WORKERS = []
 TIMEOUT = 20 
