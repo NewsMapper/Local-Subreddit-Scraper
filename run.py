@@ -6,8 +6,8 @@ import requests
 import simplejson as json
 from lxml import etree
 from gevent import Greenlet, monkey
-from reddit_scrapper import TEMP_SUBREDDITS, SUBREDDITS_GEOCODING_QUEUE
-import reddit_scrapper
+from reddit_scraper import TEMP_SUBREDDITS, SUBREDDITS_GEOCODING_QUEUE
+import reddit_scraper
 import subreddit_geocoder
 from config import *
 
@@ -26,7 +26,7 @@ REGIONS = [
 ]
 
 REDDIT_WIKI = 'http://www.reddit.com/r/LocationReddits/wiki/faq/'
-SCRAPING_WORKER_COUNT = 40 
+SCRAPING_WORKER_COUNT 40 
 GEOCODING_WORKER_COUNT = 60
 WORKERS = []
 TIMEOUT = 20 
@@ -61,7 +61,7 @@ def find_subreddits(redis_client, region):
 
 
 def spawn_scraping_worker(redis_client):
-    return Greenlet.spawn(reddit_scrapper.run, redis_client)
+    return Greenlet.spawn(reddit_scraper.run, redis_client)
 
         
 

@@ -3,7 +3,6 @@ from lxml import etree
 import requests
 import redis
 import simplejson as json
-import manager
 from config import *
 
 
