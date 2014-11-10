@@ -4,7 +4,6 @@ import requests
 import redis
 import simplejson as json
 import manager
-from summarizer import summarize_by_url
 from config import *
 
 
