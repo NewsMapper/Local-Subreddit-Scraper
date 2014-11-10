@@ -73,15 +73,6 @@ def run(redis_client):
 
 
 
-if __name__ == '__main__':
-    manager.runWorker(sys.argv, run)
-
-
-
-
-
-
-
 
 
 

@@ -5,15 +5,16 @@ import redis
 import requests
 import simplejson as json
 from lxml import etree
+from gevent import Greenlet, monkey
 from reddit_scrapper import TEMP_SUBREDDITS, SUBREDDITS_GEOCODING_QUEUE
+import reddit_scrapper
+import subreddit_geocoder
 from config import *
 
-
+monkey.patch_all()
 
 dirname = os.path.dirname(os.path.abspath(__file__))
 
-SCRAPPER_LOC = os.path.join(dirname, 'reddit_scrapper.py')
-GEOCODER_LOC = os.path.join(dirname, 'subreddit_geocoder.py')
 
 REGIONS = [
     'europe',
@@ -25,8 +26,8 @@ REGIONS = [
 ]
 
 REDDIT_WIKI = 'http://www.reddit.com/r/LocationReddits/wiki/faq/'
-SCRAPING_WORKER_COUNT = 20 
-GEOCODING_WORKER_COUNT = 30
+SCRAPING_WORKER_COUNT = 40 
+GEOCODING_WORKER_COUNT = 60
 WORKERS = []
 TIMEOUT = 20 
 
@@ -59,22 +60,14 @@ def find_subreddits(redis_client, region):
 
 
 
-def spawn_scraping_worker(redis_host, redis_port):
-    return subprocess.Popen('python %s %s %s' % 
-                                (SCRAPPER_LOC,
-                                 redis_host,
-                                 redis_port), 
-                                shell=True)
+def spawn_scraping_worker(redis_client):
+    return Greenlet.spawn(reddit_scrapper.run, redis_client)
 
         
 
 
-def spawn_geocoding_worker(redis_host, redis_port):
-    return subprocess.Popen('python %s %s %s' % 
-                                    (GEOCODER_LOC,
-                                    redis_host,
-                                    redis_port), 
-                                     shell=True)
+def spawn_geocoding_worker(redis_client):
+    return Greenlet.spawn(subreddit_geocoder.run, redis_client)
 
 
 
@@ -91,17 +84,16 @@ if __name__ == '__main__':
     workers = []
 
     for i in xrange(SCRAPING_WORKER_COUNT):
-        workers.append(spawn_scraping_worker(REDIS_HOST, REDIS_PORT))
+        workers.append(spawn_scraping_worker(r))
         print 'spawning scraping worker %d' % i
 
     for i in xrange(GEOCODING_WORKER_COUNT):        
-        workers.append(spawn_geocoding_worker(REDIS_HOST, REDIS_PORT))
+        workers.append(spawn_geocoding_worker(r))
         print 'spawning geocoding worker %d' % i
 
 
     for region in REGIONS:
         find_subreddits(r, region)
-
 
     monitor = r.brpoplpush(SUBREDDITS_GEOCODING_QUEUE, SUBREDDITS_GEOCODING_QUEUE, TIMEOUT)
     while monitor is not None:

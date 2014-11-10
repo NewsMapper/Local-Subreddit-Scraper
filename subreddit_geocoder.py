@@ -3,7 +3,7 @@ import requests
 import json
 from urllib import urlencode
 from reddit_scrapper import SUBREDDITS, SUBREDDITS_GEOCODING_QUEUE
-import manager
+
 
 
 YQL_URL = 'https://query.yahooapis.com/v1/public/yql';
@@ -45,16 +45,6 @@ def run(redis_client):
         subreddit['location'] = geocode_info
         encoded = json.dumps(subreddit)
         redis_client.rpush(SUBREDDITS, encoded)
-
-
-
-
-
-
-
-if __name__ == '__main__':
-    manager.runWorker(sys.argv, run)
-
 
 
 
