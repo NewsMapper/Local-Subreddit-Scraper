@@ -1,4 +1,4 @@
-import subprocess
+import multiprocessing
 import os
 from time import time
 import redis
@@ -26,10 +26,10 @@ REGIONS = [
 ]
 
 REDDIT_WIKI = 'http://www.reddit.com/r/LocationReddits/wiki/faq/'
-SCRAPING_WORKER_COUNT = 40 
-GEOCODING_WORKER_COUNT = 60
-WORKERS = []
+SCRAPING_WORKER_COUNT = 30 
+GEOCODING_WORKER_COUNT = 60 
 TIMEOUT = 20 
+CPU_COUNT = multiprocessing.cpu_count()
 
 
 
@@ -70,7 +70,19 @@ def spawn_geocoding_worker(redis_client):
     return Greenlet.spawn(subreddit_geocoder.run, redis_client)
 
 
+def start(redis_client, pid):
+    workers = [] 
 
+    for i in xrange(SCRAPING_WORKER_COUNT):
+        workers.append(spawn_scraping_worker(r))
+        print 'spawning scraping worker %d/%d' % (pid, i)
+
+    for i in xrange(GEOCODING_WORKER_COUNT):        
+        workers.append(spawn_geocoding_worker(r))
+        print 'spawning geocoding worker %d/%d' % (pid, i)
+    
+    for w in workers:
+       w.join()
 
 
 if __name__ == '__main__':
@@ -80,17 +92,14 @@ if __name__ == '__main__':
     r.delete(TEMP_SUBREDDITS)
     r.delete(SUBREDDITS)
     r.delete(SUBREDDITS_GEOCODING_QUEUE)
+    
+    processes = []    
 
-    workers = []
 
-    for i in xrange(SCRAPING_WORKER_COUNT):
-        workers.append(spawn_scraping_worker(r))
-        print 'spawning scraping worker %d' % i
-
-    for i in xrange(GEOCODING_WORKER_COUNT):        
-        workers.append(spawn_geocoding_worker(r))
-        print 'spawning geocoding worker %d' % i
-
+    for pid in xrange(CPU_COUNT):
+        process = multiprocessing.Process(target=start, args=(r, pid))
+        process.start()
+        processes.append(process)
 
     for region in REGIONS:
         find_subreddits(r, region)
@@ -99,9 +108,8 @@ if __name__ == '__main__':
     while monitor is not None:
         monitor = r.brpoplpush(SUBREDDITS_GEOCODING_QUEUE, SUBREDDITS_GEOCODING_QUEUE, TIMEOUT)
     
-
-    for worker in workers:
-        worker.kill()
+    for p in processes:
+        p.terminate()
 
     count = len(r.lrange(SUBREDDITS, 0, -1)) 
  
